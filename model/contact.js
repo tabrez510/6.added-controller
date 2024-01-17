@@ -4,6 +4,17 @@ const path = require('path');
 
 const rootDirectory = require('../util/path');
 
+const getDetailsFromFile = (cb) => {
+    fs.readFile(path.join(rootDirectory, 'data', 'contactDetails.json'), (err, content) => {
+        if(!err){
+            cb(JSON.parse(content));
+        }
+        else {
+            cb([]);
+        }
+    })
+}
+
 module.exports = class Contact{
     constructor(name, email){
         this.name = name;
@@ -11,11 +22,7 @@ module.exports = class Contact{
     }
 
     save(cb) {
-        fs.readFile(path.join(rootDirectory, 'data', 'contactDetails.json'), (err, content) => {
-            let details = [];
-            if(!err){
-                details = JSON.parse(content);
-            }
+        getDetailsFromFile((details) => {
             details.push(this);
             fs.writeFile(path.join(rootDirectory, 'data', 'contactDetails.json'), JSON.stringify(details), (err) => {
                 if(!err){
@@ -26,10 +33,6 @@ module.exports = class Contact{
     }
 
     static fetchAll(cb){
-        fs.readFile(path.join(rootDirectory, 'data', 'contactDetails.json'), (err, content) => {
-            if(!err){
-                cb(JSON.parse(content));
-            }
-        })
+        getDetailsFromFile(cb);
     }
 }
